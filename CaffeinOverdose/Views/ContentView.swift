@@ -20,6 +20,7 @@ struct ContentView: View {
         vm.store.selectedFolder?.items ?? []
     }
 
+    // MARK: - View
     var body: some View {
         NavigationSplitView() {
             SidebarView(libraryStore: vm.store)
@@ -53,6 +54,7 @@ struct ContentView: View {
     }
 }
 
+// MARK: - Preview
 #Preview {
     do {
         // 1) 인메모리 컨테이너 생성

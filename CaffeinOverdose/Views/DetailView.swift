@@ -155,6 +155,7 @@ struct DetailView: View {
     }
 }
 
+// MARK: - Preview
 #Preview {
     DetailPreviewWrapper()
 }

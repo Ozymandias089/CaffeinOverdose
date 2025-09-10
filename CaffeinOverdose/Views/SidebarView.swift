@@ -10,7 +10,7 @@ import SwiftData
 
 struct SidebarView: View {
     @ObservedObject var libraryStore: LibraryStore
-
+// MARK: - View
     var body: some View {
         List {
             OutlineGroup([libraryStore.root], children: \.childrenOptional) { folder in
@@ -29,6 +29,7 @@ struct SidebarView: View {
     }
 }
 
+// MARK: - Sidebar row Component
 // 사이드바 행 컴포넌트: Button으로 확실하게 클릭 처리
 private struct SidebarRow: View {
     let title: String
@@ -48,6 +49,8 @@ private struct SidebarRow: View {
         )
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     SidebarPreviewWrapper()

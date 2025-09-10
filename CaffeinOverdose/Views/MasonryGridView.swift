@@ -23,7 +23,7 @@ struct MasonryGridView: View {
     private func thumbWidth(_ proxy: GeometryProxy) -> CGFloat {
         max(80, proxy.size.width / CGFloat(columns) - spacing * 2)
     }
-
+// MARK: - View
     var body: some View {
         GeometryReader { geo in
             ScrollView {
@@ -43,6 +43,7 @@ struct MasonryGridView: View {
     }
 }
 
+// MARK: - Cell Component
 private struct ThumbCell: View {
     let item: MediaItem
     let width: CGFloat
@@ -79,6 +80,8 @@ private struct ThumbCell: View {
         }
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     MasonryGridPreviewWrapper()
