@@ -6,19 +6,30 @@
 //
 
 import Foundation
+import SwiftData
 
-final class MediaFolder: Identifiable, ObservableObject, Hashable {
-    static func == (lhs: MediaFolder, rhs: MediaFolder) -> Bool { lhs.id == rhs.id }
-    func hash(into hasher: inout Hasher) { hasher.combine(id) }
-
-    let id = UUID()
-    let name: String
-    let path: String  // display path
-    @Published var subfolders: [MediaFolder] = []
-    @Published var items: [MediaItem] = []
-
-    init(name: String, path: String) {
+@Model
+final class MediaFolder {
+    // Identifier
+    @Attribute(.unique) var displayPath: String
+    var name: String
+    
+    // Tree Relations
+    @Relationship(inverse: \MediaFolder.subfolders) var parent: MediaFolder?
+    @Relationship(deleteRule: .cascade) var subfolders: [MediaFolder] = []
+    
+    // Item Relations
+    @Relationship(deleteRule: .cascade) var items: [MediaItem] = []
+    
+    init(displayPath: String, name: String, parent: MediaFolder? = nil) {
+        self.displayPath = displayPath
         self.name = name
-        self.path = path
+        self.parent = parent
     }
+}
+
+extension MediaFolder {
+    static let rootPath = "/"
+    var path: String { displayPath }
+    var childrenOptional: [MediaFolder]? { subfolders } // 기존 SidebarView의 확장 그대로 보존
 }

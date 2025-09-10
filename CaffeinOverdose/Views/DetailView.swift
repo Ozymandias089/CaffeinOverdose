@@ -155,16 +155,49 @@ struct DetailView: View {
     }
 }
 
-private struct Preview_DetailView: View {
-    @State private var idx: Int = 0
-    private let sample = MediaItem.examples()
-
-    var body: some View {
-        DetailView(items: sample, index: $idx, onClose: {})
-            .frame(width: 1000, height: 700)
-    }
+#Preview {
+    DetailPreviewWrapper()
 }
 
-#Preview {
-    Preview_DetailView()
+private struct DetailPreviewWrapper: View {
+    @State private var idx: Int = 0
+    private let items: [MediaItem]
+
+    init() {
+        // 관리되지 않는(transient) SwiftData @Model 인스턴스도 프리뷰에는 충분
+        let root = MediaFolder(displayPath: "/", name: "Library")
+        let folder = MediaFolder(displayPath: "/Preview", name: "Preview", parent: root)
+        root.subfolders.append(folder)
+
+        // 이미지 아이템 (실제 파일이 없어도 UI는 그려짐)
+        let imgItem = MediaItem(
+            filename: "portrait_1.jpg",
+            relativePath: "Preview/portrait_1.jpg", // LibraryLocation.media/Preview/portrait_1.jpg
+            kindRaw: MediaKind.image.rawValue,
+            pixelWidth: 800,
+            pixelHeight: 1200,
+            duration: nil,
+            folder: folder
+        )
+
+        // 비디오 아이템
+        let vidItem = MediaItem(
+            filename: "clip_1.webm",
+            relativePath: "Preview/clip_1.webm",
+            kindRaw: MediaKind.video.rawValue,
+            pixelWidth: 1920,
+            pixelHeight: 1080,
+            duration: 3.2,
+            folder: folder
+        )
+
+        folder.items.append(contentsOf: [imgItem, vidItem])
+        self.items = [imgItem, vidItem]
+    }
+
+    var body: some View {
+        DetailView(items: items, index: $idx, onClose: {})
+            .frame(width: 1000, height: 700)
+            .background(.black)
+    }
 }

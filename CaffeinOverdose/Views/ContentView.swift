@@ -5,8 +5,10 @@
 //  Created by 최영훈 on 9/10/25.
 //
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var context
     @ObservedObject var vm: LibraryViewModel
 
     // 모달(라이트박스)
@@ -45,12 +47,55 @@ struct ContentView: View {
         }
         // (원하면) split 스타일 조정
         .navigationSplitViewStyle(.balanced)
+        .task {
+            vm.attach(context: context)
+        }
     }
 }
 
 #Preview {
-    let vm = LibraryViewModel()
-    vm.store.root = .exampleTree()
-    vm.store.selectedFolder = vm.store.root.subfolders.first ?? vm.store.root
-    return ContentView(vm: vm).frame(width: 1100, height: 700)
+    do {
+        // 1) 인메모리 컨테이너 생성
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(
+            for: MediaFolder.self, MediaItem.self,
+            configurations: config
+        )
+        let ctx = ModelContext(container)
+
+        // 2) 샘플 데이터 시딩 (SwiftData 엔티티)
+        let root = MediaFolder(displayPath: "/", name: "Library")
+        let sample = MediaFolder(displayPath: "/Sample", name: "Sample", parent: root)
+        root.subfolders.append(sample)
+
+        let sampleItem = MediaItem(
+            filename: "sample.jpg",
+            relativePath: "Sample/sample.jpg",
+            kindRaw: MediaKind.image.rawValue,
+            pixelWidth: 800,
+            pixelHeight: 600,
+            duration: nil,
+            folder: sample
+        )
+        sample.items.append(sampleItem)
+
+        ctx.insert(root)
+        ctx.insert(sample)
+        ctx.insert(sampleItem)
+        try ctx.save()
+
+        // 3) 뷰모델 준비 + 컨텍스트 주입
+        let vm = LibraryViewModel()
+        vm.attach(context: ctx)
+
+        // 4) 뷰 반환 (컨테이너 환경 주입 필수)
+        return ContentView(vm: vm)
+            .modelContainer(container)
+            .frame(width: 1100, height: 700)
+
+    } catch {
+        return Text("Preview error: \(error.localizedDescription)")
+            .frame(width: 600, height: 200)
+    }
 }
+

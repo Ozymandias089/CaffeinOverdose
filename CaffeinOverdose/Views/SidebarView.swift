@@ -6,11 +6,7 @@
 //
 
 import SwiftUI
-
-// OutlineGroup에 Optional children이 필요하므로 보조 프로퍼티
-extension MediaFolder {
-    var childrenOptional: [MediaFolder]? { subfolders }
-}
+import SwiftData
 
 struct SidebarView: View {
     @ObservedObject var libraryStore: LibraryStore
@@ -53,22 +49,43 @@ private struct SidebarRow: View {
     }
 }
 
+#Preview {
+    SidebarPreviewWrapper()
+}
 
-// 프리뷰 래퍼
-private struct Preview_SidebarView: View {
-    let store: LibraryStore = {
+private struct SidebarPreviewWrapper: View {
+    // 미리 만들어 두고 body에서 사용
+    let container: ModelContainer
+    let store: LibraryStore
+
+    init() {
+        // 1) 인메모리 SwiftData 컨테이너
+        container = try! ModelContainer(
+            for: MediaFolder.self, MediaItem.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let ctx = ModelContext(container)
+
+        // 2) 샘플 트리 시딩
+        let root = MediaFolder(displayPath: "/", name: "Library")
+        let f1   = MediaFolder(displayPath: "/Untitled",  name: "Untitled",  parent: root)
+        let f2   = MediaFolder(displayPath: "/Untitled2", name: "Untitled2", parent: root)
+        root.subfolders.append(contentsOf: [f1, f2])
+
+        ctx.insert(root); ctx.insert(f1); ctx.insert(f2)
+        try? ctx.save()
+
+        // 3) 스토어 준비/연결
         let s = LibraryStore()
-        s.root = .exampleTree()
-        s.selectedFolder = s.root
-        return s
-    }()
+        s.attach(context: ctx)
+        s.selectFolder(f1)
+
+        self.store = s
+    }
 
     var body: some View {
         SidebarView(libraryStore: store)
+            .modelContainer(container)
             .frame(width: 300, height: 600)
     }
-}
-
-#Preview {
-    Preview_SidebarView()
 }

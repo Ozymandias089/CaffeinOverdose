@@ -7,6 +7,7 @@
 import SwiftUI
 import WaterfallGrid
 import AppKit
+import SwiftData
 
 struct MasonryGridView: View {
     @ObservedObject var libraryStore: LibraryStore
@@ -79,18 +80,52 @@ private struct ThumbCell: View {
     }
 }
 
-private struct Preview_MasonryGridView: View {
-    let store: LibraryStore = {
+#Preview {
+    MasonryGridPreviewWrapper()
+}
+
+private struct MasonryGridPreviewWrapper: View {
+    // 미리 구성해 두고 body에서 사용
+    let container: ModelContainer
+    let store: LibraryStore
+
+    init() {
+        // 1) 인메모리 SwiftData 컨테이너
+        container = try! ModelContainer(
+            for: MediaFolder.self, MediaItem.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let ctx = ModelContext(container)
+
+        // 2) 샘플 트리 + 아이템 시딩
+        let root   = MediaFolder(displayPath: "/", name: "Library")
+        let album  = MediaFolder(displayPath: "/Preview", name: "Preview", parent: root)
+        root.subfolders.append(album)
+
+        // 몇 개의 가짜 항목(파일 없어도 레이아웃 확인 용도 OK)
+        let samples: [MediaItem] = [
+            MediaItem(filename: "portrait_1.jpg", relativePath: "Preview/portrait_1.jpg", kindRaw: MediaKind.image.rawValue, pixelWidth: 800,  pixelHeight: 1200, duration: nil, folder: album),
+            MediaItem(filename: "landscape_1.jpg",relativePath: "Preview/landscape_1.jpg",kindRaw: MediaKind.image.rawValue, pixelWidth: 1600, pixelHeight: 900,  duration: nil, folder: album),
+            MediaItem(filename: "square_1.jpg",   relativePath: "Preview/square_1.jpg",   kindRaw: MediaKind.image.rawValue, pixelWidth: 1080, pixelHeight: 1080, duration: nil, folder: album),
+            MediaItem(filename: "clip_1.webm",    relativePath: "Preview/clip_1.webm",    kindRaw: MediaKind.video.rawValue, pixelWidth: 1920, pixelHeight: 1080, duration: 3.2, folder: album),
+        ]
+        album.items.append(contentsOf: samples)
+
+        ctx.insert(root); ctx.insert(album)
+        samples.forEach { ctx.insert($0) }
+        try? ctx.save()
+
+        // 3) LibraryStore 연결
         let s = LibraryStore()
-        s.root = .exampleTree()
-        s.selectedFolder = s.root.subfolders.first ?? s.root
-        return s
-    }()
+        s.attach(context: ctx)
+        s.selectFolder(album)
+
+        self.store = s
+    }
 
     var body: some View {
-        MasonryGridView(libraryStore: store)
+        MasonryGridView(libraryStore: store) { _ in }
+            .modelContainer(container)
             .frame(width: 900, height: 600)
     }
 }
-
-#Preview { Preview_MasonryGridView() }
