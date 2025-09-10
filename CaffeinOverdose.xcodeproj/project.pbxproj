@@ -6,8 +6,49 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		832DFECE2E7148A4000D15F5 /* WaterfallGrid in Frameworks */ = {isa = PBXBuildFile; productRef = 832DFECD2E7148A4000D15F5 /* WaterfallGrid */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		832DFEB92E7147C6000D15F5 /* CaffeinOverdose.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CaffeinOverdose.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		835D9F622E71881000BE2A48 /* README.sample */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = README.sample; sourceTree = "<group>"; };
+		835D9F642E71881000BE2A48 /* exclude */ = {isa = PBXFileReference; lastKnownFileType = text; path = exclude; sourceTree = "<group>"; };
+		835D9F662E71881000BE2A48 /* main */ = {isa = PBXFileReference; lastKnownFileType = text; path = main; sourceTree = "<group>"; };
+		835D9F692E71881000BE2A48 /* HEAD */ = {isa = PBXFileReference; lastKnownFileType = text; path = HEAD; sourceTree = "<group>"; };
+		835D9F6B2E71881000BE2A48 /* 3be118c621e933ed3032d89baf33987374c693 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 3be118c621e933ed3032d89baf33987374c693; sourceTree = "<group>"; };
+		835D9F6D2E71881000BE2A48 /* 86b12c3abd9ca64f214ed8efea9681d4840220 */ = {isa = PBXFileReference; lastKnownFileType = text; path = 86b12c3abd9ca64f214ed8efea9681d4840220; sourceTree = "<group>"; };
+		835D9F6F2E71881000BE2A48 /* 00db43ec3c8b462759505d635dc5545d4e8e50 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 00db43ec3c8b462759505d635dc5545d4e8e50; sourceTree = "<group>"; };
+		835D9F712E71881000BE2A48 /* 47fc50f7572b1174ed00bc93cf7b52e788ca4f */ = {isa = PBXFileReference; lastKnownFileType = file; path = 47fc50f7572b1174ed00bc93cf7b52e788ca4f; sourceTree = "<group>"; };
+		835D9F732E71881000BE2A48 /* d5dd1874856d2d44d3e90950b47266f668cf35 */ = {isa = PBXFileReference; lastKnownFileType = file; path = d5dd1874856d2d44d3e90950b47266f668cf35; sourceTree = "<group>"; };
+		835D9F752E71881000BE2A48 /* b56fce53a41192fe8bd963f2118c2b84c5fc6d */ = {isa = PBXFileReference; lastKnownFileType = file; path = b56fce53a41192fe8bd963f2118c2b84c5fc6d; sourceTree = "<group>"; };
+		835D9F772E71881000BE2A48 /* aff0ce43c2084462a8f12ea6e9c55c87914caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = aff0ce43c2084462a8f12ea6e9c55c87914caf; sourceTree = "<group>"; };
+		835D9F792E71881000BE2A48 /* bbab6af8174044caaa609a10fd176867b4734a */ = {isa = PBXFileReference; lastKnownFileType = text; path = bbab6af8174044caaa609a10fd176867b4734a; sourceTree = "<group>"; };
+		835D9F7B2E71881000BE2A48 /* 8b352cbe66278f80ab0eb51230e51eae89e423 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 8b352cbe66278f80ab0eb51230e51eae89e423; sourceTree = "<group>"; };
+		835D9F7D2E71881000BE2A48 /* e10f10adfd8edf936e388468417c718bdc55db */ = {isa = PBXFileReference; lastKnownFileType = file; path = e10f10adfd8edf936e388468417c718bdc55db; sourceTree = "<group>"; };
+		835D9F7F2E71881000BE2A48 /* c00596a7fca3f3d4bdd64053b69d86745f9e10 */ = {isa = PBXFileReference; lastKnownFileType = file; path = c00596a7fca3f3d4bdd64053b69d86745f9e10; sourceTree = "<group>"; };
+		835D9F812E71881000BE2A48 /* 9434a6254f0e9651f402737811be6634a03e9c */ = {isa = PBXFileReference; lastKnownFileType = file; path = 9434a6254f0e9651f402737811be6634a03e9c; sourceTree = "<group>"; };
+		835D9F832E71881000BE2A48 /* 6bd324c26d854187559f27f8194c8afd1795ac */ = {isa = PBXFileReference; lastKnownFileType = file; path = 6bd324c26d854187559f27f8194c8afd1795ac; sourceTree = "<group>"; };
+		835D9F852E71881000BE2A48 /* 15f473c32cd3e991fe13f580101ac2b05741cb */ = {isa = PBXFileReference; lastKnownFileType = file; path = 15f473c32cd3e991fe13f580101ac2b05741cb; sourceTree = "<group>"; };
+		835D9F872E71881000BE2A48 /* 042893e8634bd1cbe53050773daa15e791127c */ = {isa = PBXFileReference; lastKnownFileType = file; path = 042893e8634bd1cbe53050773daa15e791127c; sourceTree = "<group>"; };
+		835D9F892E71881000BE2A48 /* e281ffabe44b54f16138e834ab69cf9033acad */ = {isa = PBXFileReference; lastKnownFileType = file; path = e281ffabe44b54f16138e834ab69cf9033acad; sourceTree = "<group>"; };
+		835D9F8B2E71881000BE2A48 /* 03030dfecb48f9f0b895bfadc10b1216f1b295 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 03030dfecb48f9f0b895bfadc10b1216f1b295; sourceTree = "<group>"; };
+		835D9F8D2E71881000BE2A48 /* f4c56df625ae53e59157ac409a640de447a4c0 */ = {isa = PBXFileReference; lastKnownFileType = file; path = f4c56df625ae53e59157ac409a640de447a4c0; sourceTree = "<group>"; };
+		835D9F8F2E71881000BE2A48 /* 43d00528301ff814204ce12d7d30724b513180 */ = {isa = PBXFileReference; lastKnownFileType = text; path = 43d00528301ff814204ce12d7d30724b513180; sourceTree = "<group>"; };
+		835D9F912E71881000BE2A48 /* c19cc17a1d6452956495c8f392c3673f08a9eb */ = {isa = PBXFileReference; lastKnownFileType = file; path = c19cc17a1d6452956495c8f392c3673f08a9eb; sourceTree = "<group>"; };
+		835D9F932E71881000BE2A48 /* c2f18b49948a8f223a3807fddede0af07bf99d */ = {isa = PBXFileReference; lastKnownFileType = file; path = c2f18b49948a8f223a3807fddede0af07bf99d; sourceTree = "<group>"; };
+		835D9F952E71881000BE2A48 /* 9de29bb2d1d6434b8b29ae775ad8c2e48c5391 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 9de29bb2d1d6434b8b29ae775ad8c2e48c5391; sourceTree = "<group>"; };
+		835D9F972E71881000BE2A48 /* 8789700816459c1e1480e0b34781d9fb78a1ca */ = {isa = PBXFileReference; lastKnownFileType = file; path = 8789700816459c1e1480e0b34781d9fb78a1ca; sourceTree = "<group>"; };
+		835D9F992E71881000BE2A48 /* 50f40dc8caccacdf8d7d0eef8d6189cabd5e06 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 50f40dc8caccacdf8d7d0eef8d6189cabd5e06; sourceTree = "<group>"; };
+		835D9F9B2E71881000BE2A48 /* 27510df725d580d10feb526cfad981128bd013 */ = {isa = PBXFileReference; lastKnownFileType = file; path = 27510df725d580d10feb526cfad981128bd013; sourceTree = "<group>"; };
+		835D9FA02E71881000BE2A48 /* main */ = {isa = PBXFileReference; lastKnownFileType = text; path = main; sourceTree = "<group>"; };
+		835D9FA42E71881000BE2A48 /* COMMIT_EDITMSG */ = {isa = PBXFileReference; lastKnownFileType = text; path = COMMIT_EDITMSG; sourceTree = "<group>"; };
+		835D9FA52E71881000BE2A48 /* config */ = {isa = PBXFileReference; lastKnownFileType = text; path = config; sourceTree = "<group>"; };
+		835D9FA62E71881000BE2A48 /* description */ = {isa = PBXFileReference; lastKnownFileType = text; path = description; sourceTree = "<group>"; };
+		835D9FA72E71881000BE2A48 /* HEAD */ = {isa = PBXFileReference; lastKnownFileType = text; path = HEAD; sourceTree = "<group>"; };
+		835D9FA82E71881000BE2A48 /* index */ = {isa = PBXFileReference; lastKnownFileType = file; path = index; sourceTree = "<group>"; };
+		835D9FAA2E71881000BE2A48 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		835D9FAB2E71881000BE2A48 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -23,6 +64,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				832DFECE2E7148A4000D15F5 /* WaterfallGrid in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -32,6 +74,9 @@
 		832DFEB02E7147C6000D15F5 = {
 			isa = PBXGroup;
 			children = (
+				835D9FA92E71881000BE2A48 /* .git */,
+				835D9FAA2E71881000BE2A48 /* .gitignore */,
+				835D9FAB2E71881000BE2A48 /* README.md */,
 				832DFEBB2E7147C6000D15F5 /* CaffeinOverdose */,
 				832DFEBA2E7147C6000D15F5 /* Products */,
 			);
@@ -43,6 +88,336 @@
 				832DFEB92E7147C6000D15F5 /* CaffeinOverdose.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		835D9F632E71881000BE2A48 /* hooks */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F622E71881000BE2A48 /* README.sample */,
+			);
+			path = hooks;
+			sourceTree = "<group>";
+		};
+		835D9F652E71881000BE2A48 /* info */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F642E71881000BE2A48 /* exclude */,
+			);
+			path = info;
+			sourceTree = "<group>";
+		};
+		835D9F672E71881000BE2A48 /* heads */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F662E71881000BE2A48 /* main */,
+			);
+			path = heads;
+			sourceTree = "<group>";
+		};
+		835D9F682E71881000BE2A48 /* refs */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F672E71881000BE2A48 /* heads */,
+			);
+			path = refs;
+			sourceTree = "<group>";
+		};
+		835D9F6A2E71881000BE2A48 /* logs */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F682E71881000BE2A48 /* refs */,
+				835D9F692E71881000BE2A48 /* HEAD */,
+			);
+			path = logs;
+			sourceTree = "<group>";
+		};
+		835D9F6C2E71881000BE2A48 /* 0a */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F6B2E71881000BE2A48 /* 3be118c621e933ed3032d89baf33987374c693 */,
+			);
+			path = 0a;
+			sourceTree = "<group>";
+		};
+		835D9F6E2E71881000BE2A48 /* 01 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F6D2E71881000BE2A48 /* 86b12c3abd9ca64f214ed8efea9681d4840220 */,
+			);
+			path = 01;
+			sourceTree = "<group>";
+		};
+		835D9F702E71881000BE2A48 /* 3f */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F6F2E71881000BE2A48 /* 00db43ec3c8b462759505d635dc5545d4e8e50 */,
+			);
+			path = 3f;
+			sourceTree = "<group>";
+		};
+		835D9F722E71881000BE2A48 /* 4d */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F712E71881000BE2A48 /* 47fc50f7572b1174ed00bc93cf7b52e788ca4f */,
+			);
+			path = 4d;
+			sourceTree = "<group>";
+		};
+		835D9F742E71881000BE2A48 /* 4e */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F732E71881000BE2A48 /* d5dd1874856d2d44d3e90950b47266f668cf35 */,
+			);
+			path = 4e;
+			sourceTree = "<group>";
+		};
+		835D9F762E71881000BE2A48 /* 12 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F752E71881000BE2A48 /* b56fce53a41192fe8bd963f2118c2b84c5fc6d */,
+			);
+			path = 12;
+			sourceTree = "<group>";
+		};
+		835D9F782E71881000BE2A48 /* 18 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F772E71881000BE2A48 /* aff0ce43c2084462a8f12ea6e9c55c87914caf */,
+			);
+			path = 18;
+			sourceTree = "<group>";
+		};
+		835D9F7A2E71881000BE2A48 /* 29 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F792E71881000BE2A48 /* bbab6af8174044caaa609a10fd176867b4734a */,
+			);
+			path = 29;
+			sourceTree = "<group>";
+		};
+		835D9F7C2E71881000BE2A48 /* 30 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F7B2E71881000BE2A48 /* 8b352cbe66278f80ab0eb51230e51eae89e423 */,
+			);
+			path = 30;
+			sourceTree = "<group>";
+		};
+		835D9F7E2E71881000BE2A48 /* 34 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F7D2E71881000BE2A48 /* e10f10adfd8edf936e388468417c718bdc55db */,
+			);
+			path = 34;
+			sourceTree = "<group>";
+		};
+		835D9F802E71881000BE2A48 /* 73 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F7F2E71881000BE2A48 /* c00596a7fca3f3d4bdd64053b69d86745f9e10 */,
+			);
+			path = 73;
+			sourceTree = "<group>";
+		};
+		835D9F822E71881000BE2A48 /* 91 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F812E71881000BE2A48 /* 9434a6254f0e9651f402737811be6634a03e9c */,
+			);
+			path = 91;
+			sourceTree = "<group>";
+		};
+		835D9F842E71881000BE2A48 /* 98 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F832E71881000BE2A48 /* 6bd324c26d854187559f27f8194c8afd1795ac */,
+			);
+			path = 98;
+			sourceTree = "<group>";
+		};
+		835D9F862E71881000BE2A48 /* 99 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F852E71881000BE2A48 /* 15f473c32cd3e991fe13f580101ac2b05741cb */,
+			);
+			path = 99;
+			sourceTree = "<group>";
+		};
+		835D9F882E71881000BE2A48 /* a7 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F872E71881000BE2A48 /* 042893e8634bd1cbe53050773daa15e791127c */,
+			);
+			path = a7;
+			sourceTree = "<group>";
+		};
+		835D9F8A2E71881000BE2A48 /* ba */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F892E71881000BE2A48 /* e281ffabe44b54f16138e834ab69cf9033acad */,
+			);
+			path = ba;
+			sourceTree = "<group>";
+		};
+		835D9F8C2E71881000BE2A48 /* bf */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F8B2E71881000BE2A48 /* 03030dfecb48f9f0b895bfadc10b1216f1b295 */,
+			);
+			path = bf;
+			sourceTree = "<group>";
+		};
+		835D9F8E2E71881000BE2A48 /* c7 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F8D2E71881000BE2A48 /* f4c56df625ae53e59157ac409a640de447a4c0 */,
+			);
+			path = c7;
+			sourceTree = "<group>";
+		};
+		835D9F902E71881000BE2A48 /* ca */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F8F2E71881000BE2A48 /* 43d00528301ff814204ce12d7d30724b513180 */,
+			);
+			path = ca;
+			sourceTree = "<group>";
+		};
+		835D9F922E71881000BE2A48 /* d9 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F912E71881000BE2A48 /* c19cc17a1d6452956495c8f392c3673f08a9eb */,
+			);
+			path = d9;
+			sourceTree = "<group>";
+		};
+		835D9F942E71881000BE2A48 /* da */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F932E71881000BE2A48 /* c2f18b49948a8f223a3807fddede0af07bf99d */,
+			);
+			path = da;
+			sourceTree = "<group>";
+		};
+		835D9F962E71881000BE2A48 /* e6 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F952E71881000BE2A48 /* 9de29bb2d1d6434b8b29ae775ad8c2e48c5391 */,
+			);
+			path = e6;
+			sourceTree = "<group>";
+		};
+		835D9F982E71881000BE2A48 /* eb */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F972E71881000BE2A48 /* 8789700816459c1e1480e0b34781d9fb78a1ca */,
+			);
+			path = eb;
+			sourceTree = "<group>";
+		};
+		835D9F9A2E71881000BE2A48 /* f4 */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F992E71881000BE2A48 /* 50f40dc8caccacdf8d7d0eef8d6189cabd5e06 */,
+			);
+			path = f4;
+			sourceTree = "<group>";
+		};
+		835D9F9C2E71881000BE2A48 /* fd */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F9B2E71881000BE2A48 /* 27510df725d580d10feb526cfad981128bd013 */,
+			);
+			path = fd;
+			sourceTree = "<group>";
+		};
+		835D9F9D2E71881000BE2A48 /* info */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = info;
+			sourceTree = "<group>";
+		};
+		835D9F9E2E71881000BE2A48 /* pack */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = pack;
+			sourceTree = "<group>";
+		};
+		835D9F9F2E71881000BE2A48 /* objects */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F6C2E71881000BE2A48 /* 0a */,
+				835D9F6E2E71881000BE2A48 /* 01 */,
+				835D9F702E71881000BE2A48 /* 3f */,
+				835D9F722E71881000BE2A48 /* 4d */,
+				835D9F742E71881000BE2A48 /* 4e */,
+				835D9F762E71881000BE2A48 /* 12 */,
+				835D9F782E71881000BE2A48 /* 18 */,
+				835D9F7A2E71881000BE2A48 /* 29 */,
+				835D9F7C2E71881000BE2A48 /* 30 */,
+				835D9F7E2E71881000BE2A48 /* 34 */,
+				835D9F802E71881000BE2A48 /* 73 */,
+				835D9F822E71881000BE2A48 /* 91 */,
+				835D9F842E71881000BE2A48 /* 98 */,
+				835D9F862E71881000BE2A48 /* 99 */,
+				835D9F882E71881000BE2A48 /* a7 */,
+				835D9F8A2E71881000BE2A48 /* ba */,
+				835D9F8C2E71881000BE2A48 /* bf */,
+				835D9F8E2E71881000BE2A48 /* c7 */,
+				835D9F902E71881000BE2A48 /* ca */,
+				835D9F922E71881000BE2A48 /* d9 */,
+				835D9F942E71881000BE2A48 /* da */,
+				835D9F962E71881000BE2A48 /* e6 */,
+				835D9F982E71881000BE2A48 /* eb */,
+				835D9F9A2E71881000BE2A48 /* f4 */,
+				835D9F9C2E71881000BE2A48 /* fd */,
+				835D9F9D2E71881000BE2A48 /* info */,
+				835D9F9E2E71881000BE2A48 /* pack */,
+			);
+			path = objects;
+			sourceTree = "<group>";
+		};
+		835D9FA12E71881000BE2A48 /* heads */ = {
+			isa = PBXGroup;
+			children = (
+				835D9FA02E71881000BE2A48 /* main */,
+			);
+			path = heads;
+			sourceTree = "<group>";
+		};
+		835D9FA22E71881000BE2A48 /* tags */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = tags;
+			sourceTree = "<group>";
+		};
+		835D9FA32E71881000BE2A48 /* refs */ = {
+			isa = PBXGroup;
+			children = (
+				835D9FA12E71881000BE2A48 /* heads */,
+				835D9FA22E71881000BE2A48 /* tags */,
+			);
+			path = refs;
+			sourceTree = "<group>";
+		};
+		835D9FA92E71881000BE2A48 /* .git */ = {
+			isa = PBXGroup;
+			children = (
+				835D9F632E71881000BE2A48 /* hooks */,
+				835D9F652E71881000BE2A48 /* info */,
+				835D9F6A2E71881000BE2A48 /* logs */,
+				835D9F9F2E71881000BE2A48 /* objects */,
+				835D9FA32E71881000BE2A48 /* refs */,
+				835D9FA42E71881000BE2A48 /* COMMIT_EDITMSG */,
+				835D9FA52E71881000BE2A48 /* config */,
+				835D9FA62E71881000BE2A48 /* description */,
+				835D9FA72E71881000BE2A48 /* HEAD */,
+				835D9FA82E71881000BE2A48 /* index */,
+			);
+			path = .git;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +440,7 @@
 			);
 			name = CaffeinOverdose;
 			packageProductDependencies = (
+				832DFECD2E7148A4000D15F5 /* WaterfallGrid */,
 			);
 			productName = CaffeinOverdose;
 			productReference = 832DFEB92E7147C6000D15F5 /* CaffeinOverdose.app */;
@@ -94,6 +470,9 @@
 			);
 			mainGroup = 832DFEB02E7147C6000D15F5;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				832DFECC2E7148A4000D15F5 /* XCRemoteSwiftPackageReference "WaterfallGrid" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 832DFEBA2E7147C6000D15F5 /* Products */;
 			projectDirPath = "";
@@ -321,6 +700,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		832DFECC2E7148A4000D15F5 /* XCRemoteSwiftPackageReference "WaterfallGrid" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/paololeonardi/WaterfallGrid";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		832DFECD2E7148A4000D15F5 /* WaterfallGrid */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 832DFECC2E7148A4000D15F5 /* XCRemoteSwiftPackageReference "WaterfallGrid" */;
+			productName = WaterfallGrid;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 832DFEB12E7147C6000D15F5 /* Project object */;
 }

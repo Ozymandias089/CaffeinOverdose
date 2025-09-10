@@ -1,0 +1,59 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+._*
+
+# Xcode
+DerivedData/
+build/
+Build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.moved-aside
+*.xcuserstate
+xcuserdata/
+**/UserInterfaceState.xcuserstate
+
+# Xcode Workspaces
+# (프로젝트 안의 xcworkspace/xcuserdata는 위에서 이미 제외됨)
+
+# Swift Package Manager
+.swiftpm/
+.build/
+SourcePackages/
+
+# Playgrounds
+*.playground/
+timeline.xctimeline
+playground.xcworkspace/
+
+# SwiftPM/Xcode가 생성하는 state 파일
+Package.pins
+# ⚠️ Package.resolved은 보통 커밋합니다. (의도적으로 버전 고정)
+# 원하면 다음 라인을 주석 해제하여 제외할 수 있음
+# Package.resolved
+
+# Fastlane (사용 안 하면)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# 앱 로그/임시 파일
+*.log
+
+# --- App-specific (옵션) -----------------------------------------
+# 만약 로컬 라이브러리를 "레포 루트"에 만들어 테스트한다면
+# 아래 주석을 해제하여 대용량 미디어가 커밋되지 않도록 하세요.
+# CaffeinOverdose.coffeelib/
+# media/
+# thumbs/
+# *.coffeelib/
+# ---------------------------------------------------------------
+
