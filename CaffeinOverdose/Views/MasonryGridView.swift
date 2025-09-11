@@ -21,7 +21,8 @@ struct MasonryGridView: View {
     }
 
     private func thumbWidth(_ proxy: GeometryProxy) -> CGFloat {
-        max(80, proxy.size.width / CGFloat(columns) - spacing * 2)
+        let raw = proxy.size.width / CGFloat(columns) - spacing * 2
+        return max(80, floor(raw))
     }
 // MARK: - View
     var body: some View {

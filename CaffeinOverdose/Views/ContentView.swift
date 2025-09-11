@@ -50,6 +50,16 @@ struct ContentView: View {
         .navigationSplitViewStyle(.balanced)
         .task {
             vm.attach(context: context)
+            await MainActor.run {
+                if vm.store.selectedFolder == nil {
+                    var fd = FetchDescriptor<MediaFolder>(predicate: #Predicate { $0.displayPath == "/" })
+                    fd.fetchLimit = 1
+                    if let root = try? context.fetch(fd).first {   // ✅ 여기!
+                        vm.store.selectFolder(root)
+                    }
+                }
+            }
+
         }
     }
 }

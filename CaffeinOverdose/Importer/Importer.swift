@@ -58,46 +58,55 @@ enum Importer {
 
     // MARK: - Importer
     /// 선택 폴더 배열을 인덱싱한다(복사/참조).
+    @MainActor
     static func importFolders(context: ModelContext,
                               roots: [URL],
                               strategy: Strategy = .copy) async -> Result {
-        // 루트 폴더 보장
+        // 루트 폴더 보장 (전부 MainActor에서 실행)
         do {
             if try fetchFolder(context: context, path: "/") == nil {
                 context.insert(MediaFolder(displayPath: "/", name: "Library", parent: nil))
-                try context.save()
+                try context.save() // ✅ 그냥 호출 (MainActor)
             }
         } catch { print("ensure root error:", error) }
 
-        
+        // 이 줄도 필요 없음: try? await MainActor.run { try context.save() }
+        // (이미 함수 전체가 @MainActor)
+
         var dirRoots: [URL] = []
         var fileRoots: [URL] = []
-        
+
         for r in roots {
             let isDir = (try? r.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
             if isDir { dirRoots.append(r) } else { fileRoots.append(r) }
         }
 
         let flattenFilesToRoot = shouldFlattenToCommonParent(roots)
-        
+
         var foldersCount = 0
         var itemsCount = 0
-        
+
+        // ⚠️ indexOneRoot / indexSingleFile 내부에서 파일 I/O는 백그라운드,
+        // DB 반영은 ensureFolders/applyPendings(@MainActor)로 hop 하도록 이미 구성되어 있어야 함.
         for root in dirRoots {
             let counts = await indexOneRoot(context: context, root: root, strategy: strategy)
             foldersCount += counts.folders
             itemsCount += counts.items
         }
-        
+
         for file in fileRoots {
             let added = await indexSingleFile(context: context,
-                                            file: file,
-                                            strategy: strategy,
-                                            placeAtLibraryRoot: flattenFilesToRoot)
+                                              file: file,
+                                              strategy: strategy,
+                                              placeAtLibraryRoot: flattenFilesToRoot)
             itemsCount += added
         }
 
-        do { try context.save() } catch { print("context.save error:", error) }
+        do {
+            try context.save() // ✅ MainActor에서 직접 save
+        } catch {
+            print("context.save error:", error)
+        }
 
         return Result(foldersIndexed: foldersCount, itemsIndexed: itemsCount)
     }

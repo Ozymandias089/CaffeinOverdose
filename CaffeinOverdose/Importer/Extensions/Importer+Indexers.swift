@@ -121,83 +121,48 @@ extension Importer {
 
     
     // MARK: - Single File indexing
-    
+    // Importer+Indexers.swift
     static func indexSingleFile(context: ModelContext,
-                                        file: URL,
-                                        strategy: Strategy,
-                                        placeAtLibraryRoot: Bool = false) async -> Int {
+                                file: URL,
+                                strategy: Strategy,
+                                placeAtLibraryRoot: Bool = false) async -> Int {
         let fm = FileManager.default
         let base = LibraryLocation.media
 
         let parentName = file.deletingLastPathComponent().lastPathComponent
-        // ✅ 평탄화면 루트(/), 아니면 기존처럼 부모명 아래
         let topName: String? = placeAtLibraryRoot ? nil : (parentName.isEmpty ? "Imports" : parentName)
+        let topDisplay = (topName != nil) ? "/\(topName!)" : "/"
 
-        let relToLibrary: String = {
-            if let t = topName { return "\(t)/\(file.lastPathComponent)" }
-            else { return file.lastPathComponent } // 루트로
+        // 1) 파일 시스템/메타는 백그라운드
+        let (dst, relToLibrary): (URL, String) = {
+            let rel = (topName ?? "") + (topName == nil ? "" : "/") + file.lastPathComponent
+            switch strategy {
+            case .copy:
+                let dst = base.appendingPathComponent(rel, isDirectory: false)
+                try? fm.createDirectory(at: dst.deletingLastPathComponent(), withIntermediateDirectories: true)
+                if !fm.fileExists(atPath: dst.path) { try? fm.copyItem(at: file, to: dst) }
+                return (dst, rel)
+            case .reference:
+                return (file, rel)
+            }
         }()
 
-        let topDisplay: String = {
-            if let t = topName { return "/" + t }
-            else { return "/" } // 루트 폴더
-        }()
+        let isVideo = videoExts.contains(file.pathExtension.lowercased())
+        let meta = await probe(url: dst, isVideo: isVideo)
 
-        // SwiftData 폴더 보장 (루트 또는 "/<top>")
-        func ensureFolder(_ displayPath: String) throws -> MediaFolder {
-            if let existing = try fetchFolder(context: context, path: displayPath) {
-                return existing
-            }
-            // 루트("/")는 importFolders 시작에서 이미 보장함
-            let comps = displayPath.split(separator: "/")
-            let parentPath = comps.dropLast().isEmpty ? "/" : "/" + comps.dropLast().joined(separator: "/")
-            let parent = (try fetchFolder(context: context, path: parentPath)) ??
-                         { let p = MediaFolder(displayPath: "/", name: "Library", parent: nil); context.insert(p); return p }()
-            let name = comps.last.map(String.init) ?? "Library"
-            let node = MediaFolder(displayPath: displayPath, name: name, parent: parent)
-            parent.subfolders.append(node)
-            context.insert(node)
-            return node
-        }
+        // 2) Pending으로 묶어서 MainActor에서 적용
+        let p = Pending(
+            relToLibrary: relToLibrary,
+            parentDisplay: topDisplay,
+            filename: dst.lastPathComponent,
+            isVideo: isVideo,
+            metaW: meta.w, metaH: meta.h, metaDur: meta.dur
+        )
 
-        do {
-            let dst: URL = {
-                switch strategy {
-                case .copy:
-                    let dst = base.appendingPathComponent(relToLibrary, isDirectory: false)
-                    try? fm.createDirectory(at: dst.deletingLastPathComponent(), withIntermediateDirectories: true)
-                    if !fm.fileExists(atPath: dst.path) {
-                        do { try fm.copyItem(at: file, to: dst) } catch { print("copyItem error:", error) }
-                    }
-                    return dst
-                case .reference:
-                    return file
-                }
-            }()
-
-            let isVideo = videoExts.contains(file.pathExtension.lowercased())
-            let meta = await probe(url: dst, isVideo: isVideo)
-
-            let folder = try ensureFolder(topDisplay)
-
-            var fd = FetchDescriptor<MediaItem>(predicate: #Predicate { $0.relativePath == relToLibrary })
-            fd.fetchLimit = 1
-            if try context.fetch(fd).first == nil {
-                let item = MediaItem(
-                    filename: dst.lastPathComponent,
-                    relativePath: relToLibrary,
-                    kindRaw: (isVideo ? MediaKind.video : .image).rawValue,
-                    pixelWidth: meta.w,
-                    pixelHeight: meta.h,
-                    duration: meta.dur,
-                    folder: folder
-                )
-                context.insert(item)
-                return 1
-            }
-        } catch {
-            print("indexSingleFile error:", error)
-        }
-        return 0
+        // 폴더 보장 + 아이템 적용은 모두 MainActor
+        _ = await ensureFolders([topDisplay], context: context)
+        let inserted = await applyPendings([p], context: context)
+        return inserted
     }
+
 }
