@@ -11,6 +11,8 @@ struct GridCellView: View {
     let item: MediaItem
     let width: CGFloat
     var onTap: () -> Void
+    
+    var cornerRadius: CGFloat = 10
 
     @State private var image: NSImage?
     
@@ -20,6 +22,14 @@ struct GridCellView: View {
         return CGSize(width: width, height: max(40, h)) // 최소 높이 가드
     }
 
+    private var onePixel: CGFloat {
+        #if canImport(AppKit)
+        1.0 / (NSScreen.main?.backingScaleFactor ?? 2.0)
+        #else
+        1.0
+        #endif
+    }
+    
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             if let img = image {
@@ -38,6 +48,11 @@ struct GridCellView: View {
                     .imageScale(.large)
                     .padding(6)
             }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .strokeBorder(.separator.opacity(0.25), lineWidth: onePixel)
         }
         .frame(width: tileSize.width, height: tileSize.height)
         .clipped()
@@ -58,6 +73,7 @@ struct GridCellView: View {
                 }
             }
         }
+        .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
     }
 }
 
