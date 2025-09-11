@@ -39,7 +39,7 @@ enum Importer {
     static func runOpenPanelAndImport(context: ModelContext,
                                       strategy: Strategy = .copy) async -> Result? {
         let panel = NSOpenPanel()
-        panel.canChooseFiles = false
+        panel.canChooseFiles = true
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = true
         panel.prompt = "Import"
@@ -56,6 +56,7 @@ enum Importer {
         return await importFolders(context: context, roots: picked, strategy: strategy)
     }
 
+    // MARK: - entrypoints.importFolders()
     /// 선택 폴더 배열을 인덱싱한다(복사/참조).
     static func importFolders(context: ModelContext,
                               roots: [URL],
@@ -68,13 +69,32 @@ enum Importer {
             }
         } catch { print("ensure root error:", error) }
 
+        
+        var dirRoots: [URL] = []
+        var fileRoots: [URL] = []
+        
+        for r in roots {
+            let isDir = (try? r.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
+            if isDir { dirRoots.append(r) } else { fileRoots.append(r) }
+        }
+
+        let flattenFilesToRoot = shouldFlattenToCommonParent(roots)
+        
         var foldersCount = 0
         var itemsCount = 0
-
-        for root in roots {
+        
+        for root in dirRoots {
             let counts = await indexOneRoot(context: context, root: root, strategy: strategy)
-            foldersCount += counts.0
-            itemsCount += counts.1
+            foldersCount += counts.folders
+            itemsCount += counts.items
+        }
+        
+        for file in fileRoots {
+            let added = await indexSingleFile(context: context,
+                                            file: file,
+                                            strategy: strategy,
+                                            placeAtLibraryRoot: flattenFilesToRoot)
+            itemsCount += added
         }
 
         do { try context.save() } catch { print("context.save error:", error) }
@@ -82,7 +102,7 @@ enum Importer {
         return Result(foldersIndexed: foldersCount, itemsIndexed: itemsCount)
     }
 
-    // MARK: - Core
+    // MARK: - CORE Root Folder Indexing
 
     /// 한 개의 최상위 폴더를 인덱싱
     private static func indexOneRoot(context: ModelContext,
@@ -231,7 +251,89 @@ enum Importer {
 
         return (foldersAdded, itemsAdded)
     }
+    
+    // MARK: - CORE Single File indexing
+    
+    private static func indexSingleFile(context: ModelContext,
+                                        file: URL,
+                                        strategy: Strategy,
+                                        placeAtLibraryRoot: Bool = false) async -> Int {
+        let fm = FileManager.default
+        let base = LibraryLocation.media
 
+        let parentName = file.deletingLastPathComponent().lastPathComponent
+        // ✅ 평탄화면 루트(/), 아니면 기존처럼 부모명 아래
+        let topName: String? = placeAtLibraryRoot ? nil : (parentName.isEmpty ? "Imports" : parentName)
+
+        let relToLibrary: String = {
+            if let t = topName { return "\(t)/\(file.lastPathComponent)" }
+            else { return file.lastPathComponent } // 루트로
+        }()
+
+        let topDisplay: String = {
+            if let t = topName { return "/" + t }
+            else { return "/" } // 루트 폴더
+        }()
+
+        // SwiftData 폴더 보장 (루트 또는 "/<top>")
+        func ensureFolder(_ displayPath: String) throws -> MediaFolder {
+            if let existing = try fetchFolder(context: context, path: displayPath) {
+                return existing
+            }
+            // 루트("/")는 importFolders 시작에서 이미 보장함
+            let comps = displayPath.split(separator: "/")
+            let parentPath = comps.dropLast().isEmpty ? "/" : "/" + comps.dropLast().joined(separator: "/")
+            let parent = (try fetchFolder(context: context, path: parentPath)) ??
+                         { let p = MediaFolder(displayPath: "/", name: "Library", parent: nil); context.insert(p); return p }()
+            let name = comps.last.map(String.init) ?? "Library"
+            let node = MediaFolder(displayPath: displayPath, name: name, parent: parent)
+            parent.subfolders.append(node)
+            context.insert(node)
+            return node
+        }
+
+        do {
+            let dst: URL = {
+                switch strategy {
+                case .copy:
+                    let dst = base.appendingPathComponent(relToLibrary, isDirectory: false)
+                    try? fm.createDirectory(at: dst.deletingLastPathComponent(), withIntermediateDirectories: true)
+                    if !fm.fileExists(atPath: dst.path) {
+                        do { try fm.copyItem(at: file, to: dst) } catch { print("copyItem error:", error) }
+                    }
+                    return dst
+                case .reference:
+                    return file
+                }
+            }()
+
+            let isVideo = videoExts.contains(file.pathExtension.lowercased())
+            let meta = await probe(url: dst, isVideo: isVideo)
+
+            let folder = try ensureFolder(topDisplay)
+
+            var fd = FetchDescriptor<MediaItem>(predicate: #Predicate { $0.relativePath == relToLibrary })
+            fd.fetchLimit = 1
+            if try context.fetch(fd).first == nil {
+                let item = MediaItem(
+                    filename: dst.lastPathComponent,
+                    relativePath: relToLibrary,
+                    kindRaw: (isVideo ? MediaKind.video : .image).rawValue,
+                    pixelWidth: meta.w,
+                    pixelHeight: meta.h,
+                    duration: meta.dur,
+                    folder: folder
+                )
+                context.insert(item)
+                return 1
+            }
+        } catch {
+            print("indexSingleFile error:", error)
+        }
+        return 0
+    }
+
+    
     // MARK: - Helpers
 
     private static let videoExts: Set<String> = ["mp4", "mov", "m4v", "avi", "mkv", "webm"]
@@ -270,4 +372,12 @@ enum Importer {
             return (0, 0, nil)
         }
     }
+    
+    private static func shouldFlattenToCommonParent(_ urls: [URL]) -> Bool {
+        guard !urls.isEmpty else { return false }
+        // 모든 선택 항목의 "직접 부모"가 동일하면 true (부모 자체를 선택한 건 아님)
+        let parents = Set(urls.map { $0.deletingLastPathComponent() })
+        return parents.count == 1
+    }
+
 }
