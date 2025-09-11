@@ -51,7 +51,7 @@ private struct SidebarRow: View {
 }
 
 // MARK: - Preview
-
+#if DEBUG
 #Preview {
     SidebarPreviewWrapper()
 }
@@ -92,3 +92,4 @@ private struct SidebarPreviewWrapper: View {
             .frame(width: 300, height: 600)
     }
 }
+#endif

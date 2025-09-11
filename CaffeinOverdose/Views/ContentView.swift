@@ -14,6 +14,7 @@ struct ContentView: View {
     // 모달(라이트박스)
     @State private var isViewerPresented = false
     @State private var viewerIndex = 0
+    @State private var viewerItemIDs: [UUID] = []
 
     // 현재 폴더 아이템
     private var items: [MediaItem] {
@@ -32,11 +33,13 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $isViewerPresented) {
-            DetailView(items: items, index: $viewerIndex) {
+            DetailView(itemIDs: viewerItemIDs, index: $viewerIndex) {
                 isViewerPresented = false
             }
+            .environment(\.modelContext, context)   // ✅ 부모와 동일한 컨텍스트 강제 주입
             .frame(minWidth: 900, minHeight: 600)
         }
+
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button {
@@ -65,6 +68,7 @@ struct ContentView: View {
 }
 
 // MARK: - Preview
+#if DEBUG
 #Preview {
     do {
         // 1) 인메모리 컨테이너 생성
@@ -110,4 +114,4 @@ struct ContentView: View {
             .frame(width: 600, height: 200)
     }
 }
-
+#endif

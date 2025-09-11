@@ -45,7 +45,7 @@ struct MasonryGridView: View {
 }
 
 // MARK: - Preview
-
+#if DEBUG
 #Preview {
     MasonryGridPreviewWrapper()
 }
@@ -95,3 +95,4 @@ private struct MasonryGridPreviewWrapper: View {
             .frame(width: 900, height: 600)
     }
 }
+#endif

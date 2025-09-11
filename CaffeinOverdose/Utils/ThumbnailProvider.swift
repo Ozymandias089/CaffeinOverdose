@@ -46,10 +46,10 @@ final class ThumbnailProvider {
         let data: Data? = await Task.detached(priority: .utility) { [item] in
             switch item.kind {
             case .image:
-                return Self.makeImageThumbnailPNG(from: item.url, maxPixel: width)
+                return Self.makeImageThumbnailPNG(from: item.url, maxPixel: width * 2)
             case .video:
                 guard let cg = await Self.videoFrameCGImage(from: item.url) else { return nil }
-                let scaled = Self.cgScaled(cg, toMaxWidth: CGFloat(width)) ?? cg
+                let scaled = Self.cgScaled(cg, toMaxWidth: CGFloat(width*2)) ?? cg
                 return Self.pngData(from: scaled)
             }
         }.value
