@@ -34,11 +34,19 @@ struct GridCellView: View {
         }
         .task(id: "\(item.id.uuidString)_\(Int(width))") {
             guard FileManager.default.fileExists(atPath: item.url.path) else { return }
-            if let img = await ThumbnailProvider.shared.thumbnailImage(for: item, width: width) {
-                // 변경: 애니메이션 없이 상태 반영
-                withAnimation(.none) { self.image = img }
-            } else {
-                withAnimation(.none) { self.image = nil } // or 실패 상태 표시
+
+            let currentID = item.id
+            let w = Int(width.rounded())
+
+            if Task.isCancelled { return }
+            let data = await ThumbnailProvider.shared.thumbnailData(for: item, width: w)
+            if Task.isCancelled { return }
+
+            await MainActor.run {
+                guard currentID == item.id else { return }   // 최신 셀만 반영
+                withAnimation(.none) {
+                    self.image = data.flatMap { NSImage(data: $0) }
+                }
             }
         }
     }

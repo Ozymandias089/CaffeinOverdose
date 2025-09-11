@@ -4,11 +4,18 @@
 //
 //  Created by 최영훈 on 9/10/25.
 //
-import Foundation
-import AppKit
-import AVFoundation
 
-@MainActor
+import Foundation
+import AVFoundation
+import ImageIO
+import UniformTypeIdentifiers
+#if canImport(AppKit)
+import AppKit
+#endif
+
+/// 썸네일을 생성/캐시하는 프로바이더.
+/// 무거운 연산은 백그라운드(Task.detached, .userInitiated)에서 수행하고,
+/// 반환은 Sendable한 `Data?`(PNG)로 제공한다.
 final class ThumbnailProvider {
     static let shared = ThumbnailProvider()
     private let fm = FileManager.default
@@ -20,89 +27,110 @@ final class ThumbnailProvider {
         return dir
     }()
 
-    private func thumbURL(for item: MediaItem, width: CGFloat) -> URL {
-        let w = max(1, Int(width.rounded()))
+    private func thumbURL(for item: MediaItem, width: Int) -> URL {
+        let w = max(1, width)
         return cacheDir.appendingPathComponent("\(item.id.uuidString)_w\(w).png")
     }
 
-    /// 최신 API 기반 async 썸네일 생성/로드
-    func thumbnailImage(for item: MediaItem, width: CGFloat) async -> NSImage? {
+    /// PNG 썸네일 데이터(캐시)를 반환한다.
+    /// - Note: Sendable 결과를 반환하므로 Actor 경계 문제나 QoS 역전 없이 안전하다.
+    func thumbnailData(for item: MediaItem, width: Int) async -> Data? {
         let out = thumbURL(for: item, width: width)
 
-        if fm.fileExists(atPath: out.path), let cached = NSImage(contentsOf: out) {
-            return cached
+        // 캐시가 있으면 즉시 반환
+        if let data = try? Data(contentsOf: out) {
+            return data
         }
 
-        let produced: NSImage?
-        switch item.kind {
-        case .image:
-            produced = resizeImage(from: item.url, targetWidth: width)
-        case .video:
-            produced = await videoFrameThumbnail(from: item.url, targetWidth: width)
-        }
+        // 백그라운드에서 생성
+        let data: Data? = await Task.detached(priority: .utility) { [item] in
+            switch item.kind {
+            case .image:
+                return Self.makeImageThumbnailPNG(from: item.url, maxPixel: width)
+            case .video:
+                guard let cg = await Self.videoFrameCGImage(from: item.url) else { return nil }
+                let scaled = Self.cgScaled(cg, toMaxWidth: CGFloat(width)) ?? cg
+                return Self.pngData(from: scaled)
+            }
+        }.value
 
-        if let png = produced?.pngData() {
-            try? png.write(to: out, options: .atomic)
-        }
-        return produced
+        // 캐시 저장
+        if let data { try? data.write(to: out, options: .atomic) }
+        return data
+    }
+}
+
+// MARK: - Private CG/ImageIO helpers
+private extension ThumbnailProvider {
+    /// 원본 이미지에서 최대 변 크기가 `maxPixel`인 썸네일을 만들어 PNG로 인코딩.
+    static func makeImageThumbnailPNG(from url: URL, maxPixel: Int) -> Data? {
+        guard let src = CGImageSourceCreateWithURL(url as CFURL, nil) else { return nil }
+        let opts: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceThumbnailMaxPixelSize: max(1, maxPixel),
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCache: false
+        ]
+        guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, opts as CFDictionary) else { return nil }
+        return pngData(from: cg)
     }
 
-    // MARK: - Image
-
-    private func resizeImage(from url: URL, targetWidth: CGFloat) -> NSImage? {
-        guard let src = NSImage(contentsOf: url), src.size.width > 0 else { return nil }
-        return resize(image: src, targetWidth: targetWidth)
-    }
-
-    private func resize(image: NSImage, targetWidth: CGFloat) -> NSImage? {
-        guard image.size.width > 0 else { return nil }
-        let ratio = image.size.height > 0 ? image.size.width / image.size.height : 1
-        let targetSize = NSSize(width: targetWidth, height: targetWidth / ratio)
-        let out = NSImage(size: targetSize)
-        out.lockFocus()
-        image.draw(in: NSRect(origin: .zero, size: targetSize),
-                   from: .zero, operation: .copy, fraction: 1.0)
-        out.unlockFocus()
-        return out
-    }
-
-    // MARK: - Video (최신 비동기 API)
-
-    private func videoFrameThumbnail(from url: URL, targetWidth: CGFloat) async -> NSImage? {
-        let asset = AVURLAsset(url: url) // ✅ 최신
+    /// 비디오 첫 프레임(CGImage)을 비동기로 추출.
+    static func videoFrameCGImage(from url: URL) async -> CGImage? {
+        let asset = AVURLAsset(url: url)
         let gen = AVAssetImageGenerator(asset: asset)
         gen.appliesPreferredTrackTransform = true
+        // 원하면 gen.maximumSize = CGSize(width: 1024, height: 1024)
 
         let time = CMTime(seconds: 0.1, preferredTimescale: 600)
 
-        guard let cg = await generateCGImageAsync(generator: gen, time: time) else {
-            return nil
-        }
-        let frame = NSImage(cgImage: cg, size: .zero)
-        return resize(image: frame, targetWidth: targetWidth)
-    }
-
-    /// `copyCGImage`의 최신 대안: 비동기 생성 래핑
-    private func generateCGImageAsync(generator: AVAssetImageGenerator, time: CMTime) async -> CGImage? {
-        await withCheckedContinuation { cont in
-            // 배열 버전은 여전히 최신 OS에서 사용 가능하고 안정적입니다.
-            generator.generateCGImagesAsynchronously(forTimes: [NSValue(time: time)]) {
-                // completionHandler 시그니처: (requestedTime, cgImage, actualTime, result, error)
-                _, cgImage, _, result, error in
-                if let cgImage, error == nil, result == .succeeded {
-                    cont.resume(returning: cgImage)
+        return await withCheckedContinuation { cont in
+            gen.generateCGImagesAsynchronously(forTimes: [NSValue(time: time)]) { _, cg, _, result, _ in
+                if result == .succeeded, let cg {
+                    cont.resume(returning: cg)
                 } else {
                     cont.resume(returning: nil)
                 }
             }
         }
     }
-}
 
-private extension NSImage {
-    func pngData() -> Data? {
-        guard let tiff = self.tiffRepresentation,
-              let rep = NSBitmapImageRep(data: tiff) else { return nil }
-        return rep.representation(using: .png, properties: [:])
+    /// CGImage → PNG Data
+    static func pngData(from cg: CGImage) -> Data? {
+        let data = NSMutableData()
+        guard let dest = CGImageDestinationCreateWithData(
+            data,
+            (UTType.png.identifier as CFString),
+            1,
+            nil
+        ) else { return nil }
+        CGImageDestinationAddImage(dest, cg, nil)
+        CGImageDestinationFinalize(dest)
+        return data as Data
+    }
+
+    /// 가로 최대 w로 다운스케일 (고정비율)
+    static func cgScaled(_ cg: CGImage, toMaxWidth w: CGFloat) -> CGImage? {
+        let width = CGFloat(cg.width), height = CGFloat(cg.height)
+        guard width > 0, height > 0, w > 0 else { return cg }
+        if width <= w { return cg }
+
+        let scale = w / width
+        let newW = Int(width * scale)
+        let newH = Int(height * scale)
+
+        guard let ctx = CGContext(
+            data: nil,
+            width: newW,
+            height: newH,
+            bitsPerComponent: cg.bitsPerComponent,
+            bytesPerRow: 0,
+            space: cg.colorSpace ?? CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: cg.bitmapInfo.rawValue
+        ) else { return nil }
+
+        ctx.interpolationQuality = .high
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: newW, height: newH))
+        return ctx.makeImage()
     }
 }
