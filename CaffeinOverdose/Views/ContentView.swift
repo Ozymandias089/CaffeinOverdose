@@ -12,13 +12,19 @@ struct ContentView: View {
     @ObservedObject var vm: LibraryViewModel
 
     // 모달(라이트박스)
-    @State private var isViewerPresented = false
     @State private var viewerIndex = 0
-    @State private var viewerItemIDs: [UUID] = []
+    @State private var viewer: ViewerPayload? = nil
 
     // 현재 폴더 아이템
     private var items: [MediaItem] {
         vm.store.selectedFolder?.items ?? []
+    }
+    
+    private struct ViewerPayload: Identifiable, Equatable {
+        let ids: [UUID]
+        let startIndex: Int
+        // ids와 시작 인덱스를 함께 키로 써서 뷰 아이덴티티 고정
+        var id: String { ids.map(\.uuidString).joined(separator: "|") + "#\(startIndex)" }
     }
 
     // MARK: - View
@@ -28,16 +34,51 @@ struct ContentView: View {
                 .navigationTitle("Library")
         } detail: {
             MasonryGridView(libraryStore: vm.store) { tappedIndex in
+                let ids = (vm.store.selectedFolder?.items ?? []).map(\.uuid)
                 viewerIndex = tappedIndex
-                isViewerPresented = true
+                // payload를 세팅하면 sheet가 뜸 (.sheet(item:) 사용)
+                viewer = ViewerPayload(ids: ids, startIndex: tappedIndex)
+                
+                // 🔎 컨텍스트/배열/프리플라이트 체크
+                #if DEBUG
+                print("🎯 Present viewer: tappedIndex=\(tappedIndex), ids.count=\(ids.count)")
+                print("CTX ContentView:", Unmanaged.passUnretained(context).toOpaque())
+                #endif
+                if tappedIndex < ids.count {
+                    let testId = ids[tappedIndex]
+                    do {
+                        var fd = FetchDescriptor<MediaItem>(predicate: #Predicate { $0.uuid == testId })
+                        fd.fetchLimit = 1
+                        let hit = try context.fetch(fd).first != nil
+                        #if DEBUG
+                        print("Preflight fetch in ContentView: uuid=\(testId) exists? \(hit)")
+                        #endif
+                    } catch {
+                        #if DEBUG
+                        print("Preflight fetch error:", error)
+                        #endif
+                    }
+                } else {
+                    #if DEBUG
+                    print("Preflight: tappedIndex out of bounds for ids")
+                    #endif
+                }
             }
         }
-        .sheet(isPresented: $isViewerPresented) {
-            DetailView(itemIDs: viewerItemIDs, index: $viewerIndex) {
-                isViewerPresented = false
+        .sheet(item: $viewer) { payload in
+            DetailView(itemIDs: payload.ids, index: $viewerIndex, initialIndex: payload.startIndex) {
+                viewer = nil
             }
             .environment(\.modelContext, context)   // ✅ 부모와 동일한 컨텍스트 강제 주입
+            .id(payload.id)
             .frame(minWidth: 900, minHeight: 600)
+            
+            #if DEBUG
+            .onAppear {
+                print("🧩 Detail sheet appear: itemIDs.count=\(payload.ids.count), index=\(viewerIndex)")
+                print("CTX Detail(sheet env):", Unmanaged.passUnretained(context).toOpaque())
+            }
+            #endif
         }
 
         .toolbar {
@@ -82,7 +123,6 @@ struct ContentView: View {
         // 2) 샘플 데이터 시딩 (SwiftData 엔티티)
         let root = MediaFolder(displayPath: "/", name: "Library")
         let sample = MediaFolder(displayPath: "/Sample", name: "Sample", parent: root)
-        root.subfolders.append(sample)
 
         let sampleItem = MediaItem(
             filename: "sample.jpg",
@@ -93,7 +133,6 @@ struct ContentView: View {
             duration: nil,
             folder: sample
         )
-        sample.items.append(sampleItem)
 
         ctx.insert(root)
         ctx.insert(sample)

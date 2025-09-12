@@ -56,7 +56,7 @@ struct GridCellView: View {
         }
         .frame(width: tileSize.width, height: tileSize.height)
         .clipped()
-        .task(id: "\(item.id.uuidString)_\(Int(width))") {
+        .task(id: "\(item.uuid.uuidString)_\(Int(width))") {
             guard FileManager.default.fileExists(atPath: item.url.path) else { return }
 
             let currentID = item.id
@@ -77,7 +77,11 @@ struct GridCellView: View {
     }
 }
 
+#if DEBUG
 #Preview {
+    let root = MediaFolder(displayPath: "/", name: "Library")
+    let previewFolder = MediaFolder(displayPath: "/Preview", name: "Preview", parent: root)
+    
     GridCellView(
         item: MediaItem(
             filename: "portrait_1.jpg",
@@ -86,7 +90,7 @@ struct GridCellView: View {
             pixelWidth: 800,
             pixelHeight: 1200,
             duration: nil,
-            folder: nil
+            folder: previewFolder
         ),
         width: 200,
         onTap: { print("Tapped!") }
@@ -94,3 +98,4 @@ struct GridCellView: View {
     .frame(width: 200)
     .padding()
 }
+#endif

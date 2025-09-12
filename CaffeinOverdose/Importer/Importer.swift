@@ -56,22 +56,12 @@ enum Importer {
         return await importFolders(context: context, roots: picked, strategy: strategy)
     }
 
-    // MARK: - Importer
+    // MARK: - importFolders
     /// 선택 폴더 배열을 인덱싱한다(복사/참조).
     @MainActor
     static func importFolders(context: ModelContext,
                               roots: [URL],
                               strategy: Strategy = .copy) async -> Result {
-        // 루트 폴더 보장 (전부 MainActor에서 실행)
-        do {
-            if try fetchFolder(context: context, path: "/") == nil {
-                context.insert(MediaFolder(displayPath: "/", name: "Library", parent: nil))
-                try context.save() // ✅ 그냥 호출 (MainActor)
-            }
-        } catch { print("ensure root error:", error) }
-
-        // 이 줄도 필요 없음: try? await MainActor.run { try context.save() }
-        // (이미 함수 전체가 @MainActor)
 
         var dirRoots: [URL] = []
         var fileRoots: [URL] = []

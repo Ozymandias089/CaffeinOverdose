@@ -12,7 +12,7 @@ import AVFoundation
 @Model
 final class MediaItem {
     // Identifier
-    @Attribute(.unique) var id: UUID
+    @Attribute(.unique) var uuid: UUID
     
     // File Metadata
     var filename: String
@@ -23,23 +23,23 @@ final class MediaItem {
     var duration: Double? // for video
     
     // Folder Relations
-    @Relationship(inverse: \MediaFolder.items) var folder: MediaFolder?
+    @Relationship var folder: MediaFolder
     
     // Timestamp
     var createdAt: Date
     var updatedAt: Date
     
     init(
-        id: UUID = UUID(),
+        uuid: UUID = UUID(),
         filename: String,
         relativePath: String,
         kindRaw: String,
         pixelWidth: Int,
         pixelHeight: Int,
         duration: Double? = nil,
-        folder: MediaFolder?
+        folder: MediaFolder
     ) {
-        self.id = id
+        self.uuid = uuid
         self.filename = filename
         self.relativePath = relativePath
         self.kindRaw = kindRaw

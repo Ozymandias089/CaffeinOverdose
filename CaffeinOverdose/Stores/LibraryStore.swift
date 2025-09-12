@@ -52,9 +52,11 @@ final class LibraryStore: ObservableObject {
     }
 
     /// Copies a picked folder into the library root and indexes it into SwiftData.
-    func importFolderFromFilesystem(source: URL) throws {
+    @MainActor
+    func importFolderFromFilesystem(source: URL) async throws {
         precondition(context != nil, "LibraryStore.attach(context:) must be called before importing.")
 
+        // 1) 라이브러리 폴더 보장 + 소스 폴더를 라이브러리로 복사
         let base = LibraryLocation.media
         try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
 
@@ -63,83 +65,21 @@ final class LibraryStore: ObservableObject {
             try FileManager.default.copyItem(at: source, to: dest)
         }
 
+        // 2) 루트 보장은 LibraryStore가 담당 (Importer는 루트 생성 안 함)
         try ensureRootFolder()
-        let root = try fetchOrCrash(path: "/")
 
-        // Cache: displayPath → MediaFolder
-        var folderCache: [String: MediaFolder] = ["/": root]
+        // 3) 인덱싱은 Importer 한 곳에서만 수행 (관계 한쪽 갱신 + fetch-first 내부 적용)
+        _ = await Importer.indexOneRoot(context: context, root: dest, strategy: .reference)
 
-        @discardableResult
-        func ensureFolder(_ displayPath: String) throws -> MediaFolder {
-            if let f = folderCache[displayPath] { return f }
-            if displayPath == "/" { return root }
-
-            let comps = displayPath.split(separator: "/")
-            let parentPath = comps.dropLast().isEmpty ? "/" : "/" + comps.dropLast().joined(separator: "/")
-            let parent = try ensureFolder(parentPath)
-            let name = comps.last.map(String.init) ?? "Untitled"
-
-            let node = MediaFolder(displayPath: displayPath, name: name, parent: parent)
-            parent.subfolders.append(node)
-            context.insert(node)
-            folderCache[displayPath] = node
-            return node
-        }
-
-        // Ensure the top-level imported folder exists
-        let topRel = dest.path.replacingOccurrences(of: base.path, with: "")
-        let topDisplay = topRel.isEmpty ? "/" : topRel
-        _ = try ensureFolder(topDisplay)
-
-        // Enumerate and index
-        let keys: Set<URLResourceKey> = [.isDirectoryKey]
-        guard let en = FileManager.default.enumerator(
-            at: dest,
-            includingPropertiesForKeys: Array(keys),
-            options: [.skipsHiddenFiles]
-        ) else {
-            try context.save()
-            return
-        }
-
-        for case let url as URL in en {
-            let isDir = (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
-            let rel = url.path.replacingOccurrences(of: base.path + "/", with: "")
-
-            if isDir {
-                _ = try ensureFolder("/" + rel)
-            } else {
-                let displayPath = "/" + rel.split(separator: "/").dropLast().joined(separator: "/")
-                let folder = try ensureFolder(displayPath.isEmpty ? "/" : displayPath)
-
-                // Dedup by relativePath
-                var fd = FetchDescriptor<MediaItem>(predicate: #Predicate { $0.relativePath == rel })
-                fd.fetchLimit = 1
-                if try context.fetch(fd).first == nil {
-                    let filename = url.lastPathComponent
-                    let kind = inferKind(fromExtension: url.pathExtension)
-
-                    let item = MediaItem(
-                        filename: filename,
-                        relativePath: rel,
-                        kindRaw: kind.rawValue,
-                        pixelWidth: 0,
-                        pixelHeight: 0,
-                        duration: kind == .video ? 0 : nil,
-                        folder: folder
-                    )
-                    context.insert(item)
-                }
-            }
-        }
-
+        // 4) 저장
         try context.save()
 
-        // Move selection to imported folder (nice UX)
+        // 5) UX: 방금 들여온 최상위 폴더 선택
         if let newFolder = try fetchFolder(path: "/" + source.lastPathComponent) {
             self.selectedFolder = newFolder
         }
     }
+
 
     // MARK: - Private (SwiftData helpers)
 

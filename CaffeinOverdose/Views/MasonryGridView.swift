@@ -66,7 +66,6 @@ private struct MasonryGridPreviewWrapper: View {
         // 2) 샘플 트리 + 아이템 시딩
         let root   = MediaFolder(displayPath: "/", name: "Library")
         let album  = MediaFolder(displayPath: "/Preview", name: "Preview", parent: root)
-        root.subfolders.append(album)
 
         // 몇 개의 가짜 항목(파일 없어도 레이아웃 확인 용도 OK)
         let samples: [MediaItem] = [
@@ -75,7 +74,6 @@ private struct MasonryGridPreviewWrapper: View {
             MediaItem(filename: "square_1.jpg",   relativePath: "Preview/square_1.jpg",   kindRaw: MediaKind.image.rawValue, pixelWidth: 1080, pixelHeight: 1080, duration: nil, folder: album),
             MediaItem(filename: "clip_1.webm",    relativePath: "Preview/clip_1.webm",    kindRaw: MediaKind.video.rawValue, pixelWidth: 1920, pixelHeight: 1080, duration: 3.2, folder: album),
         ]
-        album.items.append(contentsOf: samples)
 
         ctx.insert(root); ctx.insert(album)
         samples.forEach { ctx.insert($0) }

@@ -11,17 +11,19 @@ import SwiftData
 @Model
 final class MediaFolder {
     // Identifier
+    @Attribute(.unique) var uuid: UUID
     @Attribute(.unique) var displayPath: String
     var name: String
     
     // Tree Relations
-    @Relationship(inverse: \MediaFolder.subfolders) var parent: MediaFolder?
-    @Relationship(deleteRule: .cascade) var subfolders: [MediaFolder] = []
+    @Relationship var parent: MediaFolder?
+    @Relationship(deleteRule: .cascade, inverse: \MediaFolder.parent) var subfolders: [MediaFolder] = []
     
     // Item Relations
-    @Relationship(deleteRule: .cascade) var items: [MediaItem] = []
+    @Relationship(deleteRule: .cascade, inverse: \MediaItem.folder) var items: [MediaItem] = []
     
     init(displayPath: String, name: String, parent: MediaFolder? = nil) {
+        self.uuid = UUID()
         self.displayPath = displayPath
         self.name = name
         self.parent = parent

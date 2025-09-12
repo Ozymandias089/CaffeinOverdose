@@ -21,7 +21,7 @@ struct Pending: Sendable {
 
 extension Importer {
     
-    // MARK: - Directories indexing
+    // MARK: - indexOneRoot()
     static func indexOneRoot(context: ModelContext,
                              root: URL,
                              strategy: Strategy) async -> (folders: Int, items: Int) {
@@ -120,8 +120,7 @@ extension Importer {
     }
 
     
-    // MARK: - Single File indexing
-    // Importer+Indexers.swift
+    // MARK: - indexSingleFile()
     static func indexSingleFile(context: ModelContext,
                                 file: URL,
                                 strategy: Strategy,

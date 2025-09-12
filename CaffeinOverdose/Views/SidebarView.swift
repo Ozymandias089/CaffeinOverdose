@@ -73,7 +73,6 @@ private struct SidebarPreviewWrapper: View {
         let root = MediaFolder(displayPath: "/", name: "Library")
         let f1   = MediaFolder(displayPath: "/Untitled",  name: "Untitled",  parent: root)
         let f2   = MediaFolder(displayPath: "/Untitled2", name: "Untitled2", parent: root)
-        root.subfolders.append(contentsOf: [f1, f2])
 
         ctx.insert(root); ctx.insert(f1); ctx.insert(f2)
         try? ctx.save()

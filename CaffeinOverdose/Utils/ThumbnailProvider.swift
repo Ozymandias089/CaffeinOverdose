@@ -29,7 +29,7 @@ final class ThumbnailProvider {
 
     private func thumbURL(for item: MediaItem, width: Int) -> URL {
         let w = max(1, width)
-        return cacheDir.appendingPathComponent("\(item.id.uuidString)_w\(w).png")
+        return cacheDir.appendingPathComponent("\(item.uuid.uuidString)_w\(w).png")
     }
 
     /// PNG 썸네일 데이터(캐시)를 반환한다.
