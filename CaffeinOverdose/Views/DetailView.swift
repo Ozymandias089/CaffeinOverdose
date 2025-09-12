@@ -4,9 +4,9 @@
 //  Swift 6 / macOS 15.6
 
 import SwiftUI
-import AVKit
 import AppKit
 import SwiftData
+import QuickLookUI   // QLPreviewView 임베드
 
 struct DetailView: View {
     // Inputs
@@ -21,10 +21,10 @@ struct DetailView: View {
     // VM
     @StateObject private var vm = DetailViewViewModel()
 
-    // Local UI state
+    // Local
     @State private var didApplyInitialIndex: Bool = false
     @State private var keyMonitor: Any?
-    
+
     init(itemIDs: [UUID], index: Binding<Int>, initialIndex: Int? = nil, onClose: @escaping () -> Void) {
         self.itemIDs = itemIDs
         self._index = index
@@ -34,86 +34,88 @@ struct DetailView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.92).ignoresSafeArea()
+            Color.black.opacity(0.96).ignoresSafeArea()
 
-            if let item = vm.loadedItem {
-                VStack(spacing: 12) {
-                    // Top bar
-                    HStack {
-                        Text(item.filename)
-                            .foregroundStyle(.white)
-                            .font(.headline)
-                        Spacer()
-                        Button { onClose() } label: {
-                            Image(systemName: "xmark.circle.fill").font(.title2)
-                        }
-                        .buttonStyle(.plain)
+            VStack(spacing: 12) {
+                // Top bar (심플)
+                HStack {
+                    Text(vm.loadedItem?.filename ?? "—")
                         .foregroundStyle(.white)
-                        .keyboardShortcut(.escape, modifiers: [])
+                        .font(.headline)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+
+                    Spacer()
+
+                    Button { onClose() } label: {
+                        Image(systemName: "xmark.circle.fill").font(.title2)
                     }
-                    .padding(.horizontal)
-
-                    // Content
-                    Group {
-                        if item.kind == .image {
-                            if let img = NSImage(contentsOf: item.url) {
-                                Image(nsImage: img)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            } else {
-                                Text("이미지를 불러올 수 없습니다.")
-                                    .foregroundStyle(.white)
-                            }
-                        } else {
-                            VideoPlayer(player: vm.player)
-                                .frame(minHeight: 420)
-                        }
-                    }
-                    .padding(.horizontal)
-
-                    // Bottom controls
-                    HStack {
-                        Button { vm.prev() } label: { Label("이전", systemImage: "chevron.left") }
-                            .keyboardShortcut(.leftArrow, modifiers: [])
-                            .disabled(!vm.canGoPrev)
-
-                        Button { vm.next() } label: { Label("다음", systemImage: "chevron.right") }
-                            .keyboardShortcut(.rightArrow, modifiers: [])
-                            .disabled(!vm.canGoNext)
-
-                        Spacer()
-
-                        if item.kind == .video {
-                            Button { vm.togglePlay() } label: { Label("재생/일시정지", systemImage: "playpause") }
-                                .keyboardShortcut(.space, modifiers: [])
-                        }
-                    }
-                    .padding([.horizontal, .bottom])
-                }
-                .foregroundStyle(.white)
-            } else {
-                Text(vm.errorMessage ?? "항목을 불러올 수 없습니다.")
+                    .buttonStyle(.plain)
                     .foregroundStyle(.white)
+                    .keyboardShortcut(.escape, modifiers: [])
+                }
+                .padding(.horizontal)
+
+                // ✅ 네이티브 Quick Look 뷰를 "그대로" 임베드
+                Group {
+                    if !vm.itemIDs.isEmpty, let urls = vm.urlsForItems() {
+                        QLPreviewRepresentable( urls: urls, index: Binding( get: { vm.index }, set: { vm.setIndex($0) }))
+                            .background(.black)
+                            // ← 여기서 스와이프(좌/우) 제스처를 SwiftUI로 처리
+                            .contentShape(Rectangle())
+                            .gesture(
+                                DragGesture(minimumDistance: 20)
+                                    .onEnded { v in
+                                        if v.translation.width < -60 { vm.next() }
+                                        else if v.translation.width > 60 { vm.prev() }
+                                    }
+                            )
+                    } else {
+                        Text(vm.errorMessage ?? "항목을 불러올 수 없습니다.")
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                // Bottom bar (필요 최소)
+                HStack {
+                    Button { vm.prev() } label: { Label("이전", systemImage: "chevron.left") }
+                        .keyboardShortcut(.leftArrow, modifiers: [])
+                        .disabled(!vm.canGoPrev)
+
+                    Button { vm.next() } label: { Label("다음", systemImage: "chevron.right") }
+                        .keyboardShortcut(.rightArrow, modifiers: [])
+                        .disabled(!vm.canGoNext)
+
+                    Spacer()
+
+                    // WEBM 외부 열기
+                    if let u = vm.loadedItem?.url, u.pathExtension.lowercased() == "webm" {
+                        Button { vm.openInIINA(u) } label: {
+                            Label("IINA로 열기", systemImage: "film")
+                        }
+                    }
+                }
+                .padding([.horizontal, .bottom])
+                .foregroundStyle(.white)
             }
+            .foregroundStyle(.white)
         }
         .onAppear {
             setupKeyMonitor()
             vm.onAppear()
         }
-        // ✅ itemIDs가 (처음 전달되거나) 바뀔 때만 configure
         .task(id: itemIDs) {
-            #if DEBUG
-            print("⚙️ Detail.task(itemIDs) count=\(itemIDs.count), index=\(index)")
-            #endif
-            
             guard !itemIDs.isEmpty else { return }
             let start = (!didApplyInitialIndex && initialIndex != nil) ? initialIndex! : index
             vm.configure(context: context, itemIDs: itemIDs, index: start)
             didApplyInitialIndex = true
+            // 부모 바인딩으로 반영
+            if vm.index != index { index = vm.index }
         }
         .task(id: index) {
-            // External index binding changed from parent
+            // 부모에서 인덱스 변경 시 반영
             vm.setIndex(index)
         }
         .onDisappear {
@@ -121,7 +123,6 @@ struct DetailView: View {
             vm.onDisappear()
         }
         .onReceive(vm.$index) { new in
-            // Propagate VM navigation back to parent binding
             if new != index { index = new }
         }
     }
@@ -133,7 +134,6 @@ struct DetailView: View {
             case 53:  onClose(); return nil          // esc
             case 123: vm.prev(); return nil          // ←
             case 124: vm.next(); return nil          // →
-            case 49:  vm.togglePlay(); return nil    // space
             default:  break
             }
             return e
@@ -143,9 +143,9 @@ struct DetailView: View {
     private func teardownKeyMonitor() {
         if let m = keyMonitor { NSEvent.removeMonitor(m) }
         keyMonitor = nil
-        vm.stopPlayer()
     }
 }
+
 
 // MARK: - Preview (updated to use ViewModel.configure)
 #if DEBUG
