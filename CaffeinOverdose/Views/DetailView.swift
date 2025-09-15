@@ -36,7 +36,7 @@ struct DetailView: View {
         ZStack {
             Color.black.opacity(0.96).ignoresSafeArea()
 
-            VStack(spacing: 12) {
+            VStack(spacing: 8) {
                 // Top bar (심플)
                 HStack {
                     Text(vm.loadedItem?.filename ?? "—")
@@ -50,11 +50,11 @@ struct DetailView: View {
                     Button { onClose() } label: {
                         Image(systemName: "xmark.circle.fill").font(.title2)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.borderless)
                     .foregroundStyle(.white)
                     .keyboardShortcut(.escape, modifiers: [])
                 }
-                .padding(.horizontal)
+                .padding(.all, 8)
 
                 // ✅ 네이티브 Quick Look 뷰를 "그대로" 임베드
                 Group {
@@ -82,10 +82,12 @@ struct DetailView: View {
                 HStack {
                     Button { vm.prev() } label: { Label("이전", systemImage: "chevron.left") }
                         .keyboardShortcut(.leftArrow, modifiers: [])
+                        .buttonStyle(.borderless)
                         .disabled(!vm.canGoPrev)
 
                     Button { vm.next() } label: { Label("다음", systemImage: "chevron.right") }
                         .keyboardShortcut(.rightArrow, modifiers: [])
+                        .buttonStyle(.borderless)
                         .disabled(!vm.canGoNext)
 
                     Spacer()
@@ -95,6 +97,7 @@ struct DetailView: View {
                         Button { vm.openInIINA(u) } label: {
                             Label("IINA로 열기", systemImage: "film")
                         }
+                        .buttonStyle(.borderless)
                     }
                 }
                 .padding([.horizontal, .bottom])
