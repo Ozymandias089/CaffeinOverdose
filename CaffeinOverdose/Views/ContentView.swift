@@ -66,9 +66,12 @@ struct ContentView: View {
             }
         }
         .sheet(item: $viewer) { payload in
-            DetailView(itemIDs: payload.ids, index: $viewerIndex, initialIndex: payload.startIndex) {
-                viewer = nil
-            }
+            DetailView(
+//                itemIDs: payload.ids, index: $viewerIndex, initialIndex: payload.startIndex
+            )
+//            {
+//                viewer = nil
+//            }
             .environment(\.modelContext, context)   // ✅ 부모와 동일한 컨텍스트 강제 주입
             .id(payload.id)
             .frame(minWidth: 900, minHeight: 600)
